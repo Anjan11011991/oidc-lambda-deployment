@@ -18,16 +18,9 @@ jobs:
       with:
         ref: ${{ github.event.inputs.branch }}
 
-    - name: Install AWS CLI
+    - name: Set up AWS CLI
       run: |
-        # Download AWS CLI v2 zip
-        Invoke-WebRequest "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-windows-x86_64.zip" -OutFile "awscliv2.zip"
-        
-        # Expand the archive into the target directory
-        Expand-Archive -Path "awscliv2.zip" -DestinationPath "C:\Program Files\Amazon\AWSCLI" -Force
-        
-        # Check AWS CLI version
-        & "C:\Program Files\Amazon\AWSCLI\aws.exe" --version
+        choco install awscli || exit 1
 
     - name: Configure AWS OIDC Authentication
       uses: aws-actions/configure-aws-credentials@v2
