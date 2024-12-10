@@ -6,7 +6,7 @@ on:
       branch:
         description: 'Branch to deploy from'
         required: true
-        default: 'main'  # Specify your default branch here
+        default: 'main'
 
 jobs:
   deploy:
@@ -16,17 +16,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-        ref: ${{ github.event.inputs.branch }}  # Check out the specified branch
+        ref: ${{ github.event.inputs.branch }}
 
-    - name: Set up AWS CLI
+    - name: Install AWS CLI
       run: |
-        choco install awscli || exit 1
-
-    - name: Configure AWS CLI for OIDC
-      run: |
-        # Install the necessary tools to use OIDC with GitHub Actions
-        curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-windows-x86_64.zip" -o "awscliv2.zip"
-        Expand-Archive awscliv2.zip -DestinationPath "C:\Program Files\Amazon\AWSCLI"
+        # Download AWS CLI v2 zip
+        Invoke-WebRequest "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-windows-x86_64.zip" -OutFile "awscliv2.zip"
+        
+        # Expand the archive into the target directory
+        Expand-Archive -Path "awscliv2.zip" -DestinationPath "C:\Program Files\Amazon\AWSCLI" -Force
+        
+        # Check AWS CLI version
         & "C:\Program Files\Amazon\AWSCLI\aws.exe" --version
 
     - name: Configure AWS OIDC Authentication
@@ -38,16 +38,14 @@ jobs:
 
     - name: Zip the function code
       run: |
-        Compress-Archive -Path * -DestinationPath Function.zip
+        pwsh -Command "Compress-Archive -Path * -DestinationPath Function.zip"
 
     - name: Deploy to Lambda
       run: |
-        # Set function name directly for the chosen environment (stage)
-        $functionName = "${{ secrets.AWS_LAMBDA_FUNCTION_STAGE }}"
-
-        # Deploy Lambda function code
-        aws lambda update-function-code --function-name $functionName --zip-file fileb://Function.zip || exit 1
+        pwsh -Command |
+          $functionName = "${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}"
+          aws lambda update-function-code --function-name $functionName --zip-file fileb://Function.zip || exit 1
 
     - name: Clean up
       run: |
-        Remove-Item Function.zip -Force
+        pwsh -Command "Remove-Item Function.zip -Force"
