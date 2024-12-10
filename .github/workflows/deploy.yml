@@ -28,6 +28,7 @@ jobs:
         role-to-assume: arn:aws:iam::975049994612:role/oidc
         aws-region: ${{ secrets.AWS_REGION }}
         role-session-name: GitHubActions
+        audience: sts.amazonaws.com  # Add audience if necessary for OIDC authentication
 
     - name: Zip the function code
       run: |
