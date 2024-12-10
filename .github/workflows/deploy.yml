@@ -25,7 +25,7 @@ jobs:
     - name: Configure AWS OIDC Authentication
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        role-to-assume: arn:aws:iam::975049994612:role/oidc
+        role-to-assume: arn:aws:iam::975049994612:role/oidc-lambda
         aws-region: ${{ secrets.AWS_REGION }}
         role-session-name: GitHubActions
         audience: sts.amazonaws.com  # Add audience if necessary for OIDC authentication
